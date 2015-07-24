@@ -1,5 +1,7 @@
 package com.company;
 
+import java.util.ArrayList;
+
 public class Main {
 
     /*
@@ -79,7 +81,105 @@ public class Main {
     }
     */
 
+    private static class Coordinate {
+        public int x;
+        public int y;
+
+        public Coordinate(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public String toString() {
+            return (x + " " + y);
+        }
+    }
+
+    private static Coordinate makeLine(Coordinate origin, int heading, int newO) {
+        if (newO == 1) {
+            origin = new Coordinate(origin.x, origin.y);
+        }
+
+        //make a "line" from the origin to the next point, based on the heading
+        switch(heading) {
+            case 0:
+                origin.x++;
+                break;
+            case 1:
+                origin.y++;
+                break;
+            case 2:origin.x--;
+                break;
+            case 3:
+                origin.y--;
+                break;
+        }
+        path.add(heading);
+        pointPath.add(origin);
+
+        xTotal += origin.x;
+        yTotal += origin.y;
+        return origin;
+    }
+
+    private static Coordinate plot_fractal(int iteration, int heading, Coordinate orig) {
+        Coordinate origin = new Coordinate(orig.x, orig.y);
+
+        if (iteration == 0) {
+            makeLine(origin, heading, 0);
+        }
+        else {
+            Coordinate newCoord = plot_fractal(iteration-1, heading, origin);
+            origin.x = newCoord.x;
+            origin.y = newCoord.y;
+            //plot_fractal(iteration-1, (heading+1) % 4, origin);
+            int newHead = (heading + 1) % 4;
+
+            //step through the path in reverse
+            for (int len = path.size() - 1; len >= 0; len--) {
+                int step = path.get(len);
+                step = (step + 1) % 4;
+                if (len == 0) {
+                    makeLine(origin, step, 0);
+                }
+                else {
+                    newCoord = makeLine(origin, step, 1);
+                    origin.x = newCoord.x;
+                    origin.y = newCoord.y;
+
+                }
+                //path.add(step);
+            }
+        }
+
+        return origin;
+    }
+
+    public static ArrayList<Integer> path;
+    public static ArrayList<Coordinate> pointPath;
+
+    public static int xTotal = 0;
+    public static int yTotal = 0;
+
     public static void main(String[] args) {
+        int n = Integer.parseInt(args[0]);
+        int datapoints = (int)(Math.pow(2, n)) + 1;
+
+        int heading = 0;
+        pointPath = new ArrayList<Coordinate>();
+        path = new ArrayList<Integer>();
+
+        Coordinate origin = new Coordinate(0,0);
+
+        pointPath.add(origin);
+
+        plot_fractal(n, heading, origin);
+
+        /*for (int i = 0; i < pointPath.size(); i++) {
+            System.out.println(pointPath.get(i).toString());
+        }*/
+
+        System.out.println("Totals: " + xTotal + " " + yTotal);
         /*
 	// get the number of rounds to go, from the arguments
         n = Integer.parseInt(args[0]);
